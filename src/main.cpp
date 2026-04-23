@@ -17,8 +17,20 @@ const char* pass = "dazdnik1";
 const char* mqtt_server = "10.195.236.205";
 const uint16_t mqtt_port = 1883;
 
-// Topic you want to receive
-const char* subTopic = "cmd/#";
+// Command topics (incoming desired state)
+const char* subCmdTopic = "cmd/#";
+
+// State topics (broker/device reports current state)
+const char* subStateTopic = "state/#";
+
+// Explicit state request topics (published on connect)
+const char* reqOutsideStateTopic = "cmd/ledOUTSIDE/POWER/get";
+const char* reqInsideStateTopic = "cmd/ledINSIDE/POWER/get";
+
+const char* cmdOutsideTopic = "cmd/ledOUTSIDE/POWER";
+const char* cmdInsideTopic = "cmd/ledINSIDE/POWER";
+const char* stateOutsideTopic = "state/ledOUTSIDE/POWER";
+const char* stateInsideTopic = "state/ledINSIDE/POWER";
 
 // (Optional) publish a heartbeat so you can see the ESP is alive
 const char* pubTopic = "status/esp8266/online";
@@ -39,6 +51,8 @@ unsigned long lastHeartbeat = 0;
 void setup_wifi();
 void ensureMqttConnected();
 void callback(char* topic, byte* payload, unsigned int length);
+bool payloadIsOn(const byte* payload, unsigned int length);
+void applyLedState(int pin, const byte* payload, unsigned int length, const char* label);
 
 void setup() {
   Serial.begin(115200);
@@ -46,9 +60,7 @@ void setup() {
 
   // Initialize GPIO pins
   pinMode(OUT_LED_PIN, OUTPUT);
-  digitalWrite(OUT_LED_PIN, LOW);  // Start with LED off
   pinMode(IN_LED_PIN, OUTPUT);
-  digitalWrite(IN_LED_PIN, LOW);
 
   setup_wifi();
 
@@ -98,29 +110,31 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
-  // Control LED on cmd/ledOUTSIDE/POWER topic
-  if (strcmp(topic, "cmd/ledOUTSIDE/POWER") == 0 && length > 0) {
-    if (payload[0] == '1') {
-      digitalWrite(OUT_LED_PIN, HIGH);
-      Serial.println("LED ON");
-    }
-    else if (payload[0] == '0') {
-      digitalWrite(OUT_LED_PIN, LOW);
-      Serial.println("LED OFF");
-    }
+  // Accept both command topics and reported state topics.
+  // This allows restoring outputs after boot from retained state responses.
+  if ((strcmp(topic, cmdOutsideTopic) == 0 || strcmp(topic, stateOutsideTopic) == 0) && length > 0) {
+    applyLedState(OUT_LED_PIN, payload, length, "OUTSIDE");
   }
 
-  if (strcmp(topic, "cmd/ledINSIDE/POWER") == 0 && length > 0) {
-    if (payload[0] == '1') {
-      digitalWrite(IN_LED_PIN, HIGH);
-      Serial.println("LED ON");
-    }
-    else if (payload[0] == '0') {
-      digitalWrite(IN_LED_PIN, LOW);
-      Serial.println("LED OFF");
-    }
+  if ((strcmp(topic, cmdInsideTopic) == 0 || strcmp(topic, stateInsideTopic) == 0) && length > 0) {
+    applyLedState(IN_LED_PIN, payload, length, "INSIDE");
   }
   
+}
+
+bool payloadIsOn(const byte* payload, unsigned int length) {
+  if (length == 0) return false;
+  return payload[0] == '1' || payload[0] == 'o' || payload[0] == 'O' || payload[0] == 't' || payload[0] == 'T';
+}
+
+void applyLedState(int pin, const byte* payload, unsigned int length, const char* label) {
+  bool on = payloadIsOn(payload, length);
+  digitalWrite(pin, on ? HIGH : LOW);
+
+  Serial.print("LED ");
+  Serial.print(label);
+  Serial.print(" => ");
+  Serial.println(on ? "ON" : "OFF");
 }
 
 void ensureMqttConnected() {
@@ -148,11 +162,22 @@ void ensureMqttConnected() {
     Serial.println("MQTT connected!");
 
     // Subscribe (do this every reconnect)
-    bool subOk = client.subscribe(subTopic);
+    bool subOk = client.subscribe(subCmdTopic);
     Serial.print("Subscribe to ");
-    Serial.print(subTopic);
+    Serial.print(subCmdTopic);
     Serial.print(" => ");
     Serial.println(subOk ? "OK" : "FAILED (client-side)");
+
+    bool stateSubOk = client.subscribe(subStateTopic);
+    Serial.print("Subscribe to ");
+    Serial.print(subStateTopic);
+    Serial.print(" => ");
+    Serial.println(stateSubOk ? "OK" : "FAILED (client-side)");
+
+    // Ask your MQTT automation/broker for current LED states after boot/reconnect.
+    // Expected response: retained or immediate publish to state/led.../POWER topics.
+    client.publish(reqOutsideStateTopic, "get");
+    client.publish(reqInsideStateTopic, "get");
 
     // Optional: publish a status message
     client.publish(pubTopic, "1", true); // retained
