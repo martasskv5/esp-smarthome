@@ -11,7 +11,7 @@
 #include <Servo.h>
 
 // servo senzor
-const int servo_pin = 9;
+const int servo_pin = 13;
 Servo servo;
 
 // gas senzor
@@ -144,13 +144,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (on) {
       // Move from 0 to 90 degrees
       for (int pos = 0; pos <= 90; pos += 1) {
+        yield();
         servo.write(pos);   // Set position
+        yield();
         delay(15);          // Wait 15ms for the servo to move
       }
     } else {
       // Move back from 90 to 0 degrees
       for (int pos = 90; pos >= 0; pos -= 1) {
+        yield();
         servo.write(pos);
+        yield();
         delay(15);
       }
     }
