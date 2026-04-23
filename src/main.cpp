@@ -9,6 +9,9 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+const int MQ2_ANALOG_PIN = A0;
+const int MQ2_DIH_ITAL_PIN = 14;
+
 // ==== WiFi ====
 const char* ssid = "MAJCHROCIK";
 const char* pass = "dazdnik1";
@@ -49,6 +52,9 @@ void setup() {
   digitalWrite(OUT_LED_PIN, LOW);  // Start with LED off
   pinMode(IN_LED_PIN, OUTPUT);
   digitalWrite(IN_LED_PIN, LOW);
+  pinMode(MQ2_DIH_ITAL_PIN, INPUT);
+  Serial.println("Mq2 starting up");
+  delay(30000);
 
   setup_wifi();
 
@@ -164,9 +170,37 @@ void ensureMqttConnected() {
   }
 }
 
-void humidityResponse(){
+void gasResponse(){
 
+  int rawValue = analogRead(MQ2_ANALOG_PIN);
+  int digitalAlert = digitalRead(MQ2_DIH_ITAL_PIN);
 
+  int mapped = map(rawValue, 0,1023,0,100);
+  Serial.print("Raw gas level: ");
+  Serial.print(rawValue);
+  Serial.print(" | Alert: ");
+  Serial.println(digitalAlert == LOW ? "GAS DETECTED" : "Clear");
+
+  if (client.connected()) {
+
+    char buf[8];
+    itoa(mapped, buf, 10); // convert int to string
+
+    bool gasSent   = client.publish("stat/mq2/gas", buf);
+    bool alertSent = client.publish("stat/mq2/alert", digitalAlert == LOW ? "ON" : "OFF");
+
+    Serial.print("  >> stat/mq2/gas sent: ");
+    Serial.print(gasSent ? "ok" : "failed");
+    Serial.print(" | value: ");
+    Serial.println(buf);
+
+    Serial.print("  >> stat/mq2/alert sent: ");
+    Serial.print(alertSent ? "ok" : "failed");
+    Serial.print(" | value: ");
+    Serial.println(digitalAlert == LOW ? "ON" : "OFF");
+  } else {
+    Serial.println("shit MQTT not working bro, skipping publish");
+  }
 }
 
 void loop() {
@@ -210,4 +244,11 @@ void loop() {
   }
 
   delay(10);
+
+
+  static unsigned long lastRead = 0;
+  if(millis() - lastRead >= 5000){
+    lastRead = millis();
+    gasResponse();
+  }
 }
