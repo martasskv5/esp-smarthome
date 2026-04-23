@@ -8,9 +8,12 @@
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <Servo.h>
 
 // servo senzor
 const int servo_pin = 9;
+Servo servo;
+
 // gas senzor
 const int MQ2_ANALOG_PIN = A0;
 const int MQ2_DIH_ITAL_PIN = 14;
@@ -72,6 +75,8 @@ void setup() {
   pinMode(IN_LED_PIN, OUTPUT);
   digitalWrite(IN_LED_PIN, LOW);
   pinMode(MQ2_DIH_ITAL_PIN, INPUT);
+  pinMode(servo_pin, OUTPUT);
+  servo.attach(servo_pin);
   Serial.println("Mq2 starting up, waiting 30 seconds");
   delay(30000);
 
@@ -136,7 +141,19 @@ void callback(char* topic, byte* payload, unsigned int length) {
   //door servo
   if ((strcmp(topic, cmdDoorTopic) == 0 || strcmp(topic, stateDoorTopic) == 0) && length > 0) {
     bool on = payloadIsOn(payload, length);
-    digitalWrite(servo_pin, on ? HIGH : LOW);
+    if (on) {
+      // Move from 0 to 90 degrees
+      for (int pos = 0; pos <= 90; pos += 1) {
+        servo.write(pos);   // Set position
+        delay(15);          // Wait 15ms for the servo to move
+      }
+    } else {
+      // Move back from 90 to 0 degrees
+      for (int pos = 90; pos >= 0; pos -= 1) {
+        servo.write(pos);
+        delay(15);
+      }
+    }
   }
 }
 
