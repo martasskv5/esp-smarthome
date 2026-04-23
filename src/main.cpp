@@ -23,6 +23,10 @@ const char* subTopic = "cmd/#";
 // (Optional) publish a heartbeat so you can see the ESP is alive
 const char* pubTopic = "status/esp8266/online";
 
+// GPIO pins
+const int OUT_LED_PIN = 5;  // D1 on NodeMCU (GPIO5)
+const int IN_LED_PIN = 4;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -39,6 +43,12 @@ void callback(char* topic, byte* payload, unsigned int length);
 void setup() {
   Serial.begin(115200);
   delay(50);
+
+  // Initialize GPIO pins
+  pinMode(OUT_LED_PIN, OUTPUT);
+  digitalWrite(OUT_LED_PIN, LOW);  // Start with LED off
+  pinMode(IN_LED_PIN, OUTPUT);
+  digitalWrite(IN_LED_PIN, LOW);
 
   setup_wifi();
 
@@ -88,12 +98,29 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
-  // Example: if topic == cmd/ledOUTSIDE/POWER and payload is '1' / '0'
-  // You can parse like this (optional):
-  // if (strcmp(topic, subTopic) == 0 && length > 0) {
-  //   if (payload[0] == '1') { ... }
-  //   else if (payload[0] == '0') { ... }
-  // }
+  // Control LED on cmd/ledOUTSIDE/POWER topic
+  if (strcmp(topic, "cmd/ledOUTSIDE/POWER") == 0 && length > 0) {
+    if (payload[0] == '1') {
+      digitalWrite(OUT_LED_PIN, HIGH);
+      Serial.println("LED ON");
+    }
+    else if (payload[0] == '0') {
+      digitalWrite(OUT_LED_PIN, LOW);
+      Serial.println("LED OFF");
+    }
+  }
+
+  if (strcmp(topic, "cmd/ledINSIDE/POWER") == 0 && length > 0) {
+    if (payload[0] == '1') {
+      digitalWrite(IN_LED_PIN, HIGH);
+      Serial.println("LED ON");
+    }
+    else if (payload[0] == '0') {
+      digitalWrite(IN_LED_PIN, LOW);
+      Serial.println("LED OFF");
+    }
+  }
+  
 }
 
 void ensureMqttConnected() {
@@ -135,6 +162,11 @@ void ensureMqttConnected() {
     // Common states:
     // -2 = network failed, -4 = timeout, 5 = not authorized
   }
+}
+
+void humidityResponse(){
+
+
 }
 
 void loop() {
