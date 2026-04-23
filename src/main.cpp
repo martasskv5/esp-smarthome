@@ -66,7 +66,7 @@ void setup() {
   pinMode(IN_LED_PIN, OUTPUT);
   digitalWrite(IN_LED_PIN, LOW);
   pinMode(MQ2_DIH_ITAL_PIN, INPUT);
-  Serial.println("Mq2 starting up");
+  Serial.println("Mq2 starting up, waiting 30 seconds");
   delay(30000);
 
   setup_wifi();
@@ -212,18 +212,12 @@ void gasResponse(){
     char buf[8];
     itoa(mapped, buf, 10); // convert int to string
 
-    bool gasSent   = client.publish("stat/mq2/gas", buf);
-    bool alertSent = client.publish("stat/mq2/alert", digitalAlert == LOW ? "ON" : "OFF");
+    bool gasSent   = client.publish("stat/humidity/VALUE", buf);
 
-    Serial.print("  >> stat/mq2/gas sent: ");
+    Serial.print("  >> stat/humidity/VALUE sent: ");
     Serial.print(gasSent ? "ok" : "failed");
     Serial.print(" | value: ");
     Serial.println(buf);
-
-    Serial.print("  >> stat/mq2/alert sent: ");
-    Serial.print(alertSent ? "ok" : "failed");
-    Serial.print(" | value: ");
-    Serial.println(digitalAlert == LOW ? "ON" : "OFF");
   } else {
     Serial.println("shit MQTT not working bro, skipping publish");
   }
