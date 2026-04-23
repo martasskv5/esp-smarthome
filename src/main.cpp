@@ -9,6 +9,9 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+// servo senzor
+const int servo_pin = 9;
+// gas senzor
 const int MQ2_ANALOG_PIN = A0;
 const int MQ2_DIH_ITAL_PIN = 14;
 
@@ -32,8 +35,11 @@ const char* reqInsideStateTopic = "cmd/ledINSIDE/POWER/get";
 
 const char* cmdOutsideTopic = "cmd/ledOUTSIDE/POWER";
 const char* cmdInsideTopic = "cmd/ledINSIDE/POWER";
-const char* stateOutsideTopic = "state/ledOUTSIDE/POWER";
-const char* stateInsideTopic = "state/ledINSIDE/POWER";
+const char* stateOutsideTopic = "stat/ledOUTSIDE/POWER";
+const char* stateInsideTopic = "stat/ledINSIDE/POWER";
+
+const char* cmdDoorTopic = "cmd/door/OPEN";
+const char* stateDoorTopic = "stat/door/OPEN";
 
 // (Optional) publish a heartbeat so you can see the ESP is alive
 const char* pubTopic = "status/esp8266/online";
@@ -127,6 +133,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     applyLedState(IN_LED_PIN, payload, length, "INSIDE");
   }
   
+  //door servo
+  if ((strcmp(topic, cmdDoorTopic) == 0 || strcmp(topic, stateDoorTopic) == 0) && length > 0) {
+    bool on = payloadIsOn(payload, length);
+    digitalWrite(servo_pin, on ? HIGH : LOW);
+  }
 }
 
 bool payloadIsOn(const byte* payload, unsigned int length) {
@@ -195,6 +206,10 @@ void ensureMqttConnected() {
     // -2 = network failed, -4 = timeout, 5 = not authorized
   }
 }
+void doorOpen(){
+
+}
+
 
 void gasResponse(){
 
