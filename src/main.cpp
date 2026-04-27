@@ -8,7 +8,12 @@
 
 void setup() {
   Serial.begin(115200);
-  delay(50);
+  delay(1000);
+
+  Serial.println();
+  Serial.println("ESP booting...");
+  Serial.print("Reset reason: ");
+  Serial.println(ESP.getResetReason());
 
   initLedsAndEeprom();
   initDoorHardware();
@@ -16,6 +21,8 @@ void setup() {
 
   setup_wifi();
   initMqtt();
+
+  Serial.println("Setup complete");
 }
 
 void loop() {
