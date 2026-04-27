@@ -163,6 +163,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 
     // Accept both command topics and reported state topics.
     // This allows restoring outputs after boot from retained state responses.
+    // incoming messages handler
     if ((strcmp(topic, cmdOutsideTopic) == 0 || strcmp(topic, stateOutsideTopic) == 0) && length > 0)
     {
         applyLedState(OUT_LED_PIN, payload, length, "OUTSIDE");
@@ -188,18 +189,32 @@ void callback(char *topic, byte *payload, unsigned int length)
                 delay(3); // Wait 15ms for the servo to move
             }
             doorOpenState = true;
-          }
-          else
-          {
+            persistDoorStateToEeprom();
+            // Publish updated door state
+            if (client.connected())
+            {
+                client.publish(stateDoorTopic, "1", true);
+                Serial.println("Published door state: OPEN");
+            }
+        }
+        else
+        {
             // Move back from 135 to 0 degrees
             for (int pos = 135; pos >= 0; pos -= 1)
             {
-              yield();
-              servo.write(pos);
-              yield();
-              delay(3);
+                yield();
+                servo.write(pos);
+                yield();
+                delay(3);
             }
             doorOpenState = false;
+            persistDoorStateToEeprom();
+            // Publish updated door state
+            if (client.connected())
+            {
+                client.publish(stateDoorTopic, "0", true);
+                Serial.println("Published door state: CLOSED");
+            }
         }
     }
 }
@@ -386,7 +401,31 @@ void doorOpen()
     }
     doorOpenState = true;
     persistDoorStateToEeprom();
-    Serial.println("Door opened by motion sensor");
+    // Publish updated door state
+    if (client.connected())
+    {
+        client.publish(stateDoorTopic, "1", true);
+        Serial.println("Published door state: OPEN");
+    }
+}
+void doorClose()
+{
+  // Move from 135 to 0 degrees
+  for (int pos = 135; pos >= 0; pos -= 1)
+  {
+      yield();
+      servo.write(pos); // Set position
+      yield();
+      delay(3); // Wait 3ms for the servo to move
+  }
+  doorOpenState = false;
+  persistDoorStateToEeprom();
+  // Publish updated door state
+  if (client.connected())
+  {
+      client.publish(stateDoorTopic, "0", true);
+      Serial.println("Published door state: CLOSED");
+  }
 }
 
 void gasResponse()
@@ -482,22 +521,14 @@ void loop()
       {
         Serial.println("Motion detected! Opening door...");
         doorOpen();
+        Serial.println("Door opened by motion sensor");
         timer = millis();
       }
 
       // close after 10s
       if (doorOpenState && millis()-10000 >= timer)
       {
-        // Move from 135 to 0 degrees
-        for (int pos = 135; pos >= 0; pos -= 1)
-        {
-            yield();
-            servo.write(pos); // Set position
-            yield();
-            delay(3); // Wait 3ms for the servo to move
-        }
-        doorOpenState = false;
-        persistDoorStateToEeprom();
+        doorClose();
         Serial.println("Door closed by motion sensor after 10s");
       }
     }
