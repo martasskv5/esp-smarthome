@@ -114,9 +114,6 @@ void setup()
     client.setKeepAlive(15);     // seconds
 }
 
-// Forward declarations
-long measureDistance();
-
 void setup_wifi()
 {
     Serial.println();
@@ -188,17 +185,19 @@ void callback(char *topic, byte *payload, unsigned int length)
                 yield();
                 delay(5); // Wait 15ms for the servo to move
             }
-        }
-        else
-        {
+            doorOpenState = true;
+          }
+          else
+          {
             // Move back from 135 to 0 degrees
             for (int pos = 135; pos >= 0; pos -= 1)
             {
-                yield();
-                servo.write(pos);
-                yield();
-                delay(5);
+              yield();
+              servo.write(pos);
+              yield();
+              delay(5);
             }
+            doorOpenState = false;
         }
     }
 }
@@ -373,26 +372,6 @@ void ensureMqttConnected()
         // -2 = network failed, -4 = timeout, 5 = not authorized
     }
 }
-// Measure distance from ultrasonic sensor (HC-SR04)
-long measureDistance()
-{
-    // Send 10 microsecond pulse to trigger pin
-    digitalWrite(motionTriggerPin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(motionTriggerPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(motionTriggerPin, LOW);
-
-    // Measure echo pulse duration
-    long duration = pulseIn(motionEchoPin, HIGH, 30000); // 30ms timeout
-
-    // Convert duration to distance in centimeters
-    // distance = (duration / 2) / 29.1
-    long distance = (duration / 2) / 29;
-
-    return distance;
-}
-
 void doorOpen()
 {
     // Move from 0 to 135 degrees
@@ -480,22 +459,29 @@ void loop()
 
     delay(10);
 
-    // Check motion sensor (ultrasonic)
+    // Check motion sensor
     static unsigned long lastMotionCheck = 0;
     if (millis() - lastMotionCheck >= 1000) // Check every 1 second
     {
-        lastMotionCheck = millis();
-        long distance = measureDistance();
-        Serial.print("Distance: ");
-        Serial.print(distance);
-        Serial.println(" cm");
+      lastMotionCheck = millis();
+      
+      digitalWrite(motionTriggerPin, LOW);  
+      delayMicroseconds(2);  
+      digitalWrite(motionTriggerPin, HIGH);  
+      delayMicroseconds(10);  
+      digitalWrite(motionTriggerPin, LOW);
+      float duration = pulseIn(motionEchoPin, HIGH); 
+      float distance = (duration*.0343)/2;  // z rychlosti zvuku 343m/s
 
-        // Trigger door if object is within 3cm and door is not already open
-        if (distance > 0 && distance < 3 && !doorOpenState)
-        {
-            Serial.println("Motion/object detected! Opening door...");
-            doorOpen();
-        }
+      Serial.print("distance: ");
+      Serial.println(distance);
+      Serial.println(doorOpenState);
+
+      if (distance <= 4.00 && doorOpenState == false)
+      {
+        Serial.println("Motion detected! Opening door...");
+        doorOpen();
+      }
     }
 
     static unsigned long lastRead = 0;
