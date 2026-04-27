@@ -9,6 +9,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Servo.h>
+#include <EEPROM.h>
 
 // servo senzor
 const int servo_pin = 13;
@@ -30,7 +31,7 @@ const uint16_t mqtt_port = 1883;
 const char* subCmdTopic = "cmd/#";
 
 // State topics (broker/device reports current state)
-const char* subStateTopic = "state/#";
+const char* subStateTopic = "stat/#";
 
 // Explicit state request topics (published on connect)
 const char* reqOutsideStateTopic = "cmd/ledOUTSIDE/POWER/get";
@@ -51,6 +52,14 @@ const char* pubTopic = "status/esp8266/online";
 const int OUT_LED_PIN = 5;  // D1 on NodeMCU (GPIO5)
 const int IN_LED_PIN = 4;
 
+const uint8_t EEPROM_MAGIC = 0xA5;
+const int EEPROM_ADDR_MAGIC = 0;
+const int EEPROM_ADDR_OUTSIDE = 1;
+const int EEPROM_ADDR_INSIDE = 2;
+
+bool outsideLedOn = false;
+bool insideLedOn = false;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -65,6 +74,8 @@ void ensureMqttConnected();
 void callback(char* topic, byte* payload, unsigned int length);
 bool payloadIsOn(const byte* payload, unsigned int length);
 void applyLedState(int pin, const byte* payload, unsigned int length, const char* label);
+void restoreLedStatesFromEeprom();
+void persistLedStatesToEeprom();
 
 void setup() {
   Serial.begin(115200);
@@ -73,7 +84,8 @@ void setup() {
   // Initialize GPIO pins
   pinMode(OUT_LED_PIN, OUTPUT);
   pinMode(IN_LED_PIN, OUTPUT);
-  digitalWrite(IN_LED_PIN, LOW);
+  EEPROM.begin(8);
+  restoreLedStatesFromEeprom();
   pinMode(MQ2_DIH_ITAL_PIN, INPUT);
   pinMode(servo_pin, OUTPUT);
   servo.attach(servo_pin);
@@ -168,12 +180,52 @@ bool payloadIsOn(const byte* payload, unsigned int length) {
 
 void applyLedState(int pin, const byte* payload, unsigned int length, const char* label) {
   bool on = payloadIsOn(payload, length);
+  bool changed = false;
+
+  if (pin == OUT_LED_PIN) {
+    changed = (outsideLedOn != on);
+    outsideLedOn = on;
+  } else if (pin == IN_LED_PIN) {
+    changed = (insideLedOn != on);
+    insideLedOn = on;
+  }
+
   digitalWrite(pin, on ? HIGH : LOW);
+
+  if (changed) {
+    persistLedStatesToEeprom();
+  }
 
   Serial.print("LED ");
   Serial.print(label);
   Serial.print(" => ");
   Serial.println(on ? "ON" : "OFF");
+}
+
+void restoreLedStatesFromEeprom() {
+  if (EEPROM.read(EEPROM_ADDR_MAGIC) == EEPROM_MAGIC) {
+    outsideLedOn = EEPROM.read(EEPROM_ADDR_OUTSIDE) == 1;
+    insideLedOn = EEPROM.read(EEPROM_ADDR_INSIDE) == 1;
+  } else {
+    outsideLedOn = false;
+    insideLedOn = false;
+    persistLedStatesToEeprom();
+  }
+
+  digitalWrite(OUT_LED_PIN, outsideLedOn ? HIGH : LOW);
+  digitalWrite(IN_LED_PIN, insideLedOn ? HIGH : LOW);
+
+  Serial.print("Restored OUTSIDE LED: ");
+  Serial.println(outsideLedOn ? "ON" : "OFF");
+  Serial.print("Restored INSIDE LED: ");
+  Serial.println(insideLedOn ? "ON" : "OFF");
+}
+
+void persistLedStatesToEeprom() {
+  EEPROM.write(EEPROM_ADDR_MAGIC, EEPROM_MAGIC);
+  EEPROM.write(EEPROM_ADDR_OUTSIDE, outsideLedOn ? 1 : 0);
+  EEPROM.write(EEPROM_ADDR_INSIDE, insideLedOn ? 1 : 0);
+  EEPROM.commit();
 }
 
 void ensureMqttConnected() {
