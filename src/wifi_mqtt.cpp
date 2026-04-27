@@ -54,6 +54,10 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
   if (strcmp(topic, cmdDoorTopic) == 0 && length > 0) {
     handleDoorCommand(payload, length);
   }
+  
+  if (strcmp(topic, cmdDoorLockTopic) == 0 && length > 0) {
+    handleDoorLockCommand(payload, length);
+  }
 }
 
 void initMqtt() {

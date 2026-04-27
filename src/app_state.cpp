@@ -27,6 +27,8 @@ const char *stateOutsideTopic = "stat/ledOUTSIDE/POWER";
 const char *stateInsideTopic = "stat/ledINSIDE/POWER";
 const char *cmdDoorTopic = "cmd/door/OPEN";
 const char *stateDoorTopic = "stat/door/OPEN";
+const char *cmdDoorLockTopic = "cmd/door/LOCKED";
+const char *stateDoorLockTopic = "stat/door/LOCKED";
 const char *pubTopic = "status/esp8266/online";
 
 // LED pins

@@ -33,6 +33,8 @@ extern const char *stateOutsideTopic;
 extern const char *stateInsideTopic;
 extern const char *cmdDoorTopic;
 extern const char *stateDoorTopic;
+extern const char *cmdDoorLockTopic;
+extern const char *stateDoorLockTopic;
 extern const char *pubTopic;
 
 // LED pins

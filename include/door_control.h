@@ -5,8 +5,8 @@
 
 void initDoorHardware();
 void handleDoorCommand(const byte *payload, unsigned int length);
+void handleDoorLockCommand(const byte *payload, unsigned int length);
 void doorOpen();
 void doorClose();
 void checkMotionAutoClose();
-
 #endif

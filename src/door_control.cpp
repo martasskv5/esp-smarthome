@@ -26,8 +26,19 @@ void handleDoorCommand(const byte *payload, unsigned int length) {
   }
 }
 
+void handleDoorLockCommand(const byte *payload, unsigned int length){
+  bool on = payloadIsOn(payload, length);
+  if (on){
+    doorLockedState = true;
+    doorClose();
+  }
+  else {
+    doorLockedState = false;
+  }
+}
+
 void doorOpen() {
-  if (doorOpenState) {
+  if (doorOpenState || doorLockedState) {
     return;
   }
 
