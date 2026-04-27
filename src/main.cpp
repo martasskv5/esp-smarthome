@@ -15,9 +15,12 @@
 const int servo_pin = 13;
 Servo servo;
 
+// door motion sensor
+const int motionTriggerPin = 14;
+const int motionEchoPin = 12;
+
 // gas senzor
 const int MQ2_ANALOG_PIN = A0;
-const int MQ2_DIH_ITAL_PIN = 14;
 
 // ==== WiFi ====
 const char *ssid = "MAJCHROCIK";
@@ -61,6 +64,7 @@ const int EEPROM_ADDR_DOOR = 3;
 bool outsideLedOn = false;
 bool insideLedOn = false;
 bool doorOpenState = false;
+bool doorLockedState = false;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -91,7 +95,8 @@ void setup()
     pinMode(IN_LED_PIN, OUTPUT);
     EEPROM.begin(8);
     restoreLedStatesFromEeprom();
-    pinMode(MQ2_DIH_ITAL_PIN, INPUT);
+    pinMode(motionTriggerPin, OUTPUT);
+    pinMode(motionEchoPin, INPUT);
     pinMode(servo_pin, OUTPUT);
     servo.attach(servo_pin);
     //   servo.write(-2); // Start with door closed
@@ -108,6 +113,9 @@ void setup()
     client.setSocketTimeout(10); // seconds
     client.setKeepAlive(15);     // seconds
 }
+
+// Forward declarations
+long measureDistance();
 
 void setup_wifi()
 {
@@ -178,7 +186,7 @@ void callback(char *topic, byte *payload, unsigned int length)
                 yield();
                 servo.write(pos); // Set position
                 yield();
-                delay(15); // Wait 15ms for the servo to move
+                delay(5); // Wait 15ms for the servo to move
             }
         }
         else
@@ -189,7 +197,7 @@ void callback(char *topic, byte *payload, unsigned int length)
                 yield();
                 servo.write(pos);
                 yield();
-                delay(15);
+                delay(5);
             }
         }
     }
@@ -365,25 +373,50 @@ void ensureMqttConnected()
         // -2 = network failed, -4 = timeout, 5 = not authorized
     }
 }
+// Measure distance from ultrasonic sensor (HC-SR04)
+long measureDistance()
+{
+    // Send 10 microsecond pulse to trigger pin
+    digitalWrite(motionTriggerPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(motionTriggerPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(motionTriggerPin, LOW);
+
+    // Measure echo pulse duration
+    long duration = pulseIn(motionEchoPin, HIGH, 30000); // 30ms timeout
+
+    // Convert duration to distance in centimeters
+    // distance = (duration / 2) / 29.1
+    long distance = (duration / 2) / 29;
+
+    return distance;
+}
+
 void doorOpen()
 {
+    // Move from 0 to 135 degrees
+    for (int pos = 0; pos <= 135; pos += 1)
+    {
+        yield();
+        servo.write(pos); // Set position
+        yield();
+        delay(5); // Wait 5ms for the servo to move
+    }
+    doorOpenState = true;
+    persistDoorStateToEeprom();
+    Serial.println("Door opened by motion sensor");
 }
 
 void gasResponse()
 {
-
     int rawValue = analogRead(MQ2_ANALOG_PIN);
-    int digitalAlert = digitalRead(MQ2_DIH_ITAL_PIN);
 
     int mapped = map(rawValue, 0, 1023, 0, 100);
     Serial.print("Raw gas level: ");
     Serial.print(rawValue);
-    Serial.print(" | Alert: ");
-    Serial.println(digitalAlert == LOW ? "GAS DETECTED" : "Clear");
-
     if (client.connected())
     {
-
         char buf[8];
         itoa(mapped, buf, 10); // convert int to string
 
@@ -446,6 +479,24 @@ void loop()
     }
 
     delay(10);
+
+    // Check motion sensor (ultrasonic)
+    static unsigned long lastMotionCheck = 0;
+    if (millis() - lastMotionCheck >= 1000) // Check every 1 second
+    {
+        lastMotionCheck = millis();
+        long distance = measureDistance();
+        Serial.print("Distance: ");
+        Serial.print(distance);
+        Serial.println(" cm");
+
+        // Trigger door if object is within 3cm and door is not already open
+        if (distance > 0 && distance < 3 && !doorOpenState)
+        {
+            Serial.println("Motion/object detected! Opening door...");
+            doorOpen();
+        }
+    }
 
     static unsigned long lastRead = 0;
     if (millis() - lastRead >= 5000)
