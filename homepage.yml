@@ -1,0 +1,77 @@
+config:
+  label: Home Control
+  sidebar: true
+blocks:
+  - component: oh-block
+    config:
+      title: Lighting Control
+    slots:
+      default:
+        - component: oh-grid-row
+          slots:
+            default:
+              - component: oh-grid-col
+                slots:
+                  default:
+                    - component: oh-button
+                      config:
+                        text: Inside Light
+                        iconF7: lightbulb_fill
+                        fill: =(items.ESP_LED_Inside_Inside_Light.state === 'ON')
+                        color: yellow
+                        action: command
+                        actionItem: ESP_LED_Inside_Inside_Light
+                        actionCommand: "=(items.ESP_LED_Inside_Inside_Light.state === 'ON' ? 'OFF' :
+                          'ON')"
+                        style:
+                          height: 80px
+              - component: oh-grid-col
+                slots:
+                  default:
+                    - component: oh-button
+                      config:
+                        text: Outside Light
+                        iconF7: lightbulb_fill
+                        fill: =(items.ESP_LED_Outside_Outside_Light.state === 'ON')
+                        color: yellow
+                        action: command
+                        actionItem: ESP_LED_Outside_Outside_Light
+                        actionCommand: "=(items.ESP_LED_Outside_Outside_Light.state === 'ON' ? 'OFF' :
+                          'ON')"
+                        style:
+                          height: 80px
+  - component: oh-block
+    config:
+      title: Security & Environment
+    slots:
+      default:
+        - component: oh-grid-row
+          slots:
+            default:
+              - component: oh-grid-col
+                slots:
+                  default:
+                    - component: oh-button
+                      config:
+                        text: Door Status
+                        iconF7: "=(items.ESP_Door_Door_Switch.state === 'ON' ? 'lock_open' : 'lock')"
+                        fill: true
+                        color: "=(items.ESP_Door_Door_Switch.state === 'ON' ? 'orange' : 'green')"
+                        action: command
+                        actionItem: ESP_Door_Door_Switch
+                        actionCommand: "=(items.ESP_Door_Door_Switch.state === 'ON' ? 'OFF' : 'ON')"
+                        style:
+                          height: 100px
+              - component: oh-grid-col
+                slots:
+                  default:
+                    - component: oh-label-card
+                      config:
+                        title: Humidity
+                        item: ESP_Humidity_Huminity_Sensor
+                        label: =items.ESP_Humidity_Huminity_Sensor.state
+                        icon: f7:drop_fill
+                        iconColor: blue
+masonry: []
+grid: []
+canvas: []
