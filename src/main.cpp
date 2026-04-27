@@ -75,6 +75,8 @@ const unsigned long MQTT_RETRY_INTERVAL_MS = 5000;
 unsigned long lastDebug = 0;
 unsigned long lastHeartbeat = 0;
 
+static unsigned long timer = 0;
+
 void setup_wifi();
 void ensureMqttConnected();
 void callback(char *topic, byte *payload, unsigned int length);
@@ -183,7 +185,7 @@ void callback(char *topic, byte *payload, unsigned int length)
                 yield();
                 servo.write(pos); // Set position
                 yield();
-                delay(5); // Wait 15ms for the servo to move
+                delay(3); // Wait 15ms for the servo to move
             }
             doorOpenState = true;
           }
@@ -195,7 +197,7 @@ void callback(char *topic, byte *payload, unsigned int length)
               yield();
               servo.write(pos);
               yield();
-              delay(5);
+              delay(3);
             }
             doorOpenState = false;
         }
@@ -289,7 +291,7 @@ void restoreDoorStatesFromEeprom()
             yield();
             servo.write(pos); // Set position
             yield();
-            delay(15); // Wait 15ms for the servo to move
+            delay(3); // Wait 15ms for the servo to move
         }
     }
     else
@@ -300,7 +302,7 @@ void restoreDoorStatesFromEeprom()
             yield();
             servo.write(pos);
             yield();
-            delay(15);
+            delay(3);
         }
     }
 
@@ -380,7 +382,7 @@ void doorOpen()
         yield();
         servo.write(pos); // Set position
         yield();
-        delay(5); // Wait 5ms for the servo to move
+        delay(3); // Wait 5ms for the servo to move
     }
     doorOpenState = true;
     persistDoorStateToEeprom();
@@ -475,12 +477,28 @@ void loop()
 
       Serial.print("distance: ");
       Serial.println(distance);
-      Serial.println(doorOpenState);
 
-      if (distance <= 4.00 && doorOpenState == false)
+      if (distance <= 4.00 && !doorOpenState)
       {
         Serial.println("Motion detected! Opening door...");
         doorOpen();
+        timer = millis();
+      }
+
+      // close after 10s
+      if (doorOpenState && millis()-10000 >= timer)
+      {
+        // Move from 135 to 0 degrees
+        for (int pos = 135; pos >= 0; pos -= 1)
+        {
+            yield();
+            servo.write(pos); // Set position
+            yield();
+            delay(3); // Wait 3ms for the servo to move
+        }
+        doorOpenState = false;
+        persistDoorStateToEeprom();
+        Serial.println("Door closed by motion sensor after 10s");
       }
     }
 
