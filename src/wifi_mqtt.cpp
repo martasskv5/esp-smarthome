@@ -106,6 +106,8 @@ void ensureMqttConnected() {
 
     client.publish(reqOutsideStateTopic, "get");
     client.publish(reqInsideStateTopic, "get");
+    client.publish(stateDoorTopic, doorOpenState ? "1" : "0", true);
+    client.publish(stateDoorLockTopic, doorLockedState ? "1" : "0", true);
     client.publish(pubTopic, "1", true);
   } else {
     Serial.print("MQTT connect failed, state=");

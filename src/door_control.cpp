@@ -6,7 +6,7 @@
 #include "utils.h"
 
 static void restoreDoorStatesFromEeprom();
-static void persistDoorStateToEeprom();
+static void persistDoorStatesToEeprom();
 
 void initDoorHardware() {
   pinMode(motionTriggerPin, OUTPUT);
@@ -29,11 +29,21 @@ void handleDoorCommand(const byte *payload, unsigned int length) {
 void handleDoorLockCommand(const byte *payload, unsigned int length){
   bool on = payloadIsOn(payload, length);
   if (on){
+    Serial.println("Locking door...");
     doorLockedState = true;
     doorClose();
   }
   else {
+    Serial.println("Unlocking door...");
     doorLockedState = false;
+  }
+
+  persistDoorStatesToEeprom();
+
+  if (client.connected()) {
+    client.publish(stateDoorLockTopic, doorLockedState ? "1" : "0", true);
+    Serial.print("Published door lock state: ");
+    Serial.println(doorLockedState ? "LOCKED" : "UNLOCKED");
   }
 }
 
@@ -51,7 +61,7 @@ void doorOpen() {
 
   doorOpenState = true;
   doorAutoCloseArmed = false;
-  persistDoorStateToEeprom();
+  persistDoorStatesToEeprom();
 
   if (client.connected()) {
     client.publish(stateDoorTopic, "1", true);
@@ -73,7 +83,7 @@ void doorClose() {
 
   doorOpenState = false;
   doorAutoCloseArmed = false;
-  persistDoorStateToEeprom();
+  persistDoorStatesToEeprom();
 
   if (client.connected()) {
     client.publish(stateDoorTopic, "0", true);
@@ -132,9 +142,15 @@ void checkMotionAutoClose() {
 static void restoreDoorStatesFromEeprom() {
   if (EEPROM.read(EEPROM_ADDR_MAGIC) == EEPROM_MAGIC) {
     doorOpenState = EEPROM.read(EEPROM_ADDR_DOOR) == 1;
+    doorLockedState = EEPROM.read(EEPROM_ADDR_DOOR_LOCK) == 1;
   } else {
     doorOpenState = false;
-    persistDoorStateToEeprom();
+    doorLockedState = false;
+    persistDoorStatesToEeprom();
+  }
+
+  if (doorLockedState) {
+    doorOpenState = false;
   }
 
   if (doorOpenState) {
@@ -157,10 +173,13 @@ static void restoreDoorStatesFromEeprom() {
 
   Serial.print("Restored DOOR: ");
   Serial.println(doorOpenState ? "OPEN" : "CLOSED");
+  Serial.print("Restored LOCK: ");
+  Serial.println(doorLockedState ? "LOCKED" : "UNLOCKED");
 }
 
-static void persistDoorStateToEeprom() {
+static void persistDoorStatesToEeprom() {
   EEPROM.write(EEPROM_ADDR_MAGIC, EEPROM_MAGIC);
   EEPROM.write(EEPROM_ADDR_DOOR, doorOpenState ? 1 : 0);
+  EEPROM.write(EEPROM_ADDR_DOOR_LOCK, doorLockedState ? 1 : 0);
   EEPROM.commit();
 }

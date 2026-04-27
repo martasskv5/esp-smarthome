@@ -2,12 +2,31 @@
 
 #include "app_state.h"
 
+namespace {
+unsigned long mq2WarmupStartMs = 0;
+bool mq2ReadyLogged = false;
+const unsigned long MQ2_WARMUP_MS = 30000;
+}
+
 void initGasSensor() {
-  Serial.println("Mq2 starting up, waiting 30 seconds");
-  delay(30000);
+  mq2WarmupStartMs = millis();
+  mq2ReadyLogged = false;
+  Serial.println("Mq2 starting up, warmup is non-blocking (30 seconds)");
 }
 
 void gasResponse() {
+  unsigned long elapsed = millis() - mq2WarmupStartMs;
+  if (elapsed < MQ2_WARMUP_MS) {
+    Serial.print("Mq2 warming up, remaining ms: ");
+    Serial.println(MQ2_WARMUP_MS - elapsed);
+    return;
+  }
+
+  if (!mq2ReadyLogged) {
+    Serial.println("Mq2 warmup complete, starting gas publishes");
+    mq2ReadyLogged = true;
+  }
+
   int rawValue = analogRead(MQ2_ANALOG_PIN);
   int mapped = map(rawValue, 0, 1023, 0, 100);
 

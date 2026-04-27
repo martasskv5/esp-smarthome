@@ -27,8 +27,8 @@ const char *stateOutsideTopic = "stat/ledOUTSIDE/POWER";
 const char *stateInsideTopic = "stat/ledINSIDE/POWER";
 const char *cmdDoorTopic = "cmd/door/OPEN";
 const char *stateDoorTopic = "stat/door/OPEN";
-const char *cmdDoorLockTopic = "cmd/door/LOCKED";
-const char *stateDoorLockTopic = "stat/door/LOCKED";
+const char *cmdDoorLockTopic = "cmd/door/LOCK";
+const char *stateDoorLockTopic = "stat/door/LOCK";
 const char *pubTopic = "status/esp8266/online";
 
 // LED pins
@@ -41,6 +41,7 @@ const int EEPROM_ADDR_MAGIC = 0;
 const int EEPROM_ADDR_OUTSIDE = 1;
 const int EEPROM_ADDR_INSIDE = 2;
 const int EEPROM_ADDR_DOOR = 3;
+const int EEPROM_ADDR_DOOR_LOCK = 4;
 
 // Runtime state
 bool outsideLedOn = false;

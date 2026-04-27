@@ -47,6 +47,7 @@ extern const int EEPROM_ADDR_MAGIC;
 extern const int EEPROM_ADDR_OUTSIDE;
 extern const int EEPROM_ADDR_INSIDE;
 extern const int EEPROM_ADDR_DOOR;
+extern const int EEPROM_ADDR_DOOR_LOCK;
 
 // Runtime state
 extern bool outsideLedOn;
