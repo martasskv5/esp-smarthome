@@ -14,6 +14,10 @@ extern const int motionEchoPin;
 // Gas sensor pins
 extern const int MQ2_ANALOG_PIN;
 
+// Laser tripwire pins
+extern const int laserPin;
+extern const int sensorPin;
+
 // WiFi credentials
 extern const char *ssid;
 extern const char *pass;
@@ -79,5 +83,10 @@ extern unsigned long lastDebug;
 extern unsigned long lastHeartbeat;
 extern unsigned long doorAutoCloseTimer;
 extern bool doorAutoCloseArmed;
+
+// Laser tripwire state
+extern unsigned long lastLaserCheck;
+extern const unsigned long LASER_CHECK_INTERVAL_MS;
+extern const char *laserAlarmTopic;
 
 #endif

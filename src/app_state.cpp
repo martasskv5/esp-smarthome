@@ -8,6 +8,10 @@ const int motionEchoPin = 12;
 // Gas sensor pins
 const int MQ2_ANALOG_PIN = A0;
 
+// Laser tripwire pins
+const int laserPin = 10; // GPIO10 - controls the laser
+const int sensorPin = 9; // GPIO9 - digital pin for photoresistor sensor
+
 // WiFi credentials
 const char *ssid = "MAJCHROCIK";
 const char *pass = "dazdnik1";
@@ -78,3 +82,8 @@ unsigned long lastDebug = 0;
 unsigned long lastHeartbeat = 0;
 unsigned long doorAutoCloseTimer = 0;
 bool doorAutoCloseArmed = false;
+
+// Laser tripwire state
+unsigned long lastLaserCheck = 0;
+const unsigned long LASER_CHECK_INTERVAL_MS = 50; // Check every 50ms
+const char *laserAlarmTopic = "stat/alarm/LASER";
