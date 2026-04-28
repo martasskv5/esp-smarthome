@@ -8,10 +8,6 @@ const int motionEchoPin = 12;
 // Gas sensor pins
 const int MQ2_ANALOG_PIN = A0;
 
-// Laser tripwire pins
-const int laserPin = 10; // GPIO10 - controls the laser
-const int sensorPin = 9; // GPIO9 - digital pin for photoresistor sensor
-
 // WiFi credentials
 const char *ssid = "MAJCHROCIK";
 const char *pass = "dazdnik1";
@@ -42,21 +38,12 @@ const char *stateDoorTopic = "stat/door/OPEN";
 const char *cmdDoorLockTopic = "cmd/door/LOCK";
 const char *stateDoorLockTopic = "stat/door/LOCK";
 
-// this shit communicates with mqtt aka openHabian, it sends shit 
-// and signals so it knows when its on or off type shit
-const char *cmdTripwireTopic = "cmd/alarm/ON";
-const char *stateTripwireTopic = "stat/alarm/ON";
-
 // what the fuck is this
 const char *pubTopic = "status/esp8266/online";
 
 // LED pins
 const int OUT_LED_PIN = 5;
 const int IN_LED_PIN = 4;
-
-//TRIPWIRE pins
-const int OUT_LASER = 10;
-const int IN_FOTORES = 9;
 
 // EEPROM addresses and markers | what-fucking-ever this means
 const uint8_t EEPROM_MAGIC = 0xA5;
@@ -82,8 +69,3 @@ unsigned long lastDebug = 0;
 unsigned long lastHeartbeat = 0;
 unsigned long doorAutoCloseTimer = 0;
 bool doorAutoCloseArmed = false;
-
-// Laser tripwire state
-unsigned long lastLaserCheck = 0;
-const unsigned long LASER_CHECK_INTERVAL_MS = 50; // Check every 50ms
-const char *laserAlarmTopic = "stat/alarm/LASER";

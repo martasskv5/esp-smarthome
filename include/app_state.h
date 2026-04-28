@@ -14,10 +14,6 @@ extern const int motionEchoPin;
 // Gas sensor pins
 extern const int MQ2_ANALOG_PIN;
 
-// Laser tripwire pins
-extern const int laserPin;
-extern const int sensorPin;
-
 // WiFi credentials
 extern const char *ssid;
 extern const char *pass;
@@ -45,19 +41,11 @@ extern const char *stateDoorTopic;
 extern const char *cmdDoorLockTopic;
 extern const char *stateDoorLockTopic;
 
-// defined tripwire
-extern const char *cmdTripwireTopic;
-extern const char *stateTripwireTopic;
-
 extern const char *pubTopic;
 
 // LED pins
 extern const int OUT_LED_PIN;
 extern const int IN_LED_PIN;
-
-// LASER tripwire pins
-extern const int OUT_LASER;
-extern const int IN_FOTORES;
 
 // EEPROM addresses and markers
 extern const uint8_t EEPROM_MAGIC;
@@ -83,10 +71,5 @@ extern unsigned long lastDebug;
 extern unsigned long lastHeartbeat;
 extern unsigned long doorAutoCloseTimer;
 extern bool doorAutoCloseArmed;
-
-// Laser tripwire state
-extern unsigned long lastLaserCheck;
-extern const unsigned long LASER_CHECK_INTERVAL_MS;
-extern const char *laserAlarmTopic;
 
 #endif

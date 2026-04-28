@@ -3,7 +3,6 @@
 #include "app_state.h"
 #include "door_control.h"
 #include "gas_sensor.h"
-#include "laser_tripwire.h"
 #include "led_control.h"
 #include "wifi_mqtt.h"
 
@@ -20,7 +19,6 @@ void setup()
   initLedsAndEeprom();
   initDoorHardware();
   initGasSensor();
-  initLaserTripwire();
 
   setup_wifi();
   initMqtt();
@@ -67,8 +65,6 @@ void loop()
   }
 
   checkMotionAutoClose();
-  // Check laser tripwire for beam interruption
-  checkLaserBeam();
 
   static unsigned long lastRead = 0;
   if (millis() - lastRead >= 5000)
