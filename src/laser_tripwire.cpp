@@ -3,7 +3,7 @@
 #include "app_state.h"
 
 // Laser brightness (PWM value)
-const int laserBrightness = 50;
+const int laserBrightness = 500;
 
 /**
  * Initialize laser tripwire hardware:
