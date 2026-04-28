@@ -2,8 +2,8 @@
 
 #include "app_state.h"
 
-// Laser brightness (PWM value)
-const int laserBrightness = 500;
+// Laser brightness (PWM value, 0-255)
+const int laserBrightness = 255;
 
 /**
  * Initialize laser tripwire hardware:
@@ -19,7 +19,8 @@ void initLaserTripwire()
     pinMode(sensorPin, INPUT);
 
     // Turn on the laser with PWM
-    analogWrite(laserPin, laserBrightness);
+    // analogWrite(laserPin, laserBrightness);
+    digitalWrite(laserPin, HIGH); // For digital laser modules
 
     // Wait for laser to stabilize
     delay(500);

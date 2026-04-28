@@ -175,12 +175,6 @@ blocks:
                           fontWeight: 600
                           boxShadow: 0px 4px 10px rgba(0,0,0,0.05)
                         title: Humidity
-              - component: oh-grid-col
-                config: {}
-                slots:
-                  default:
-                    - component: widget:keypad
-                      config: {}
 masonry: []
 grid: []
 canvas: []
