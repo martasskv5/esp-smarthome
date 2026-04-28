@@ -25,21 +25,35 @@ extern const uint16_t mqtt_port;
 // MQTT topics
 extern const char *subCmdTopic;
 extern const char *subStateTopic;
+
 extern const char *reqOutsideStateTopic;
 extern const char *reqInsideStateTopic;
+
 extern const char *cmdOutsideTopic;
-extern const char *cmdInsideTopic;
 extern const char *stateOutsideTopic;
+
+extern const char *cmdInsideTopic;
 extern const char *stateInsideTopic;
+
 extern const char *cmdDoorTopic;
 extern const char *stateDoorTopic;
+
 extern const char *cmdDoorLockTopic;
 extern const char *stateDoorLockTopic;
+
+// defined tripwire
+extern const char *cmdTripwireTopic;
+extern const char *stateTripwireTopic;
+
 extern const char *pubTopic;
 
 // LED pins
 extern const int OUT_LED_PIN;
 extern const int IN_LED_PIN;
+
+// LASER tripwire pins
+extern const int OUT_LASER;
+extern const int IN_FOTORES;
 
 // EEPROM addresses and markers
 extern const uint8_t EEPROM_MAGIC;
