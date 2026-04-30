@@ -58,6 +58,55 @@ Then we started using the keypad. The idea was that the LOCK is always on and th
 So once we type the right number combination on the keypad, the door will be unlocked and opened and the laser will be turned off.
 
 
+---
 
+## Development
+
+### Project structure
+
+📦esp-smarthome
+ ┣ 📂esp1 -> Main ESP in Smart House
+ ┃ ┣ 📂.pio
+ ┃ ┣ 📂.vscode
+ ┃ ┣ 📂include
+ ┃ ┃ ┣ 📜README
+ ┃ ┃ ┣ 📜app_state.h
+ ┃ ┃ ┣ 📜door_control.h
+ ┃ ┃ ┣ 📜gas_sensor.h
+ ┃ ┃ ┣ 📜led_control.h
+ ┃ ┃ ┣ 📜utils.h
+ ┃ ┃ ┗ 📜wifi_mqtt.h
+ ┃ ┣ 📂src
+ ┃ ┃ ┣ 📜app_state.cpp
+ ┃ ┃ ┣ 📜door_control.cpp
+ ┃ ┃ ┣ 📜gas_sensor.cpp
+ ┃ ┃ ┣ 📜led_control.cpp
+ ┃ ┃ ┣ 📜main.cpp
+ ┃ ┃ ┣ 📜utils.cpp
+ ┃ ┃ ┗ 📜wifi_mqtt.cpp
+ ┃ ┣ 📜.gitignore
+ ┃ ┗ 📜platformio.ini
+ ┣ 📂esp2 -> Secondary ESP for "security system"
+ ┃ ┣ 📂.pio
+ ┃ ┣ 📂.vscode
+ ┃ ┣ 📂include
+ ┃ ┃ ┣ 📜README
+ ┃ ┃ ┣ 📜app_state.h
+ ┃ ┃ ┣ 📜laser_tripwire.h
+ ┃ ┃ ┣ 📜utils.h
+ ┃ ┃ ┗ 📜wifi_mqtt.h
+ ┃ ┣ 📂src
+ ┃ ┃ ┣ 📜app_state.cpp
+ ┃ ┃ ┣ 📜laser_tripwire.cpp
+ ┃ ┃ ┣ 📜main.cpp
+ ┃ ┃ ┣ 📜utils.cpp
+ ┃ ┃ ┗ 📜wifi_mqtt.cpp
+ ┃ ┣ 📜.gitignore
+ ┃ ┗ 📜platformio.ini
+ ┣ 📂pi_keypad -> Raspberry Pi Keypad
+ ┃ ┣ 📜keypad_test.py
+ ┃ ┗ 📜main.py
+ ┣ 📜README.md
+ ┗ 📜homepage.yml -> OpenHAB Home Page
 
 
