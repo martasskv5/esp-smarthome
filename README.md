@@ -63,10 +63,9 @@ So once we type the right number combination on the keypad, the door will be unl
 ## Development
 
 ### Project structure
-
+```
 📦esp-smarthome
  ┣ 📂esp1 -> Main ESP in Smart House
- ┃ ┣ 📂.pio
  ┃ ┣ 📂.vscode
  ┃ ┣ 📂include
  ┃ ┃ ┣ 📜README
@@ -87,7 +86,6 @@ So once we type the right number combination on the keypad, the door will be unl
  ┃ ┣ 📜.gitignore
  ┃ ┗ 📜platformio.ini
  ┣ 📂esp2 -> Secondary ESP for "security system"
- ┃ ┣ 📂.pio
  ┃ ┣ 📂.vscode
  ┃ ┣ 📂include
  ┃ ┃ ┣ 📜README
@@ -108,5 +106,4 @@ So once we type the right number combination on the keypad, the door will be unl
  ┃ ┗ 📜main.py
  ┣ 📜README.md
  ┗ 📜homepage.yml -> OpenHAB Home Page
-
-
+```
