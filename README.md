@@ -1,4 +1,4 @@
-# ESP SMART HOME PROJECT FOR ERAZMUS
+# ESP RASPBERRY PI SMART-HOME PROJECT FOR ERASMUS
 
 This is a 2-week project that 6 people worked on. 
 We had a model of a house already at disposal that other people before us worked on. The cable management wasn't the greatest so one of our guys had completely redone the cables and connections. Looks alot better.
