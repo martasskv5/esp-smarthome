@@ -1,7 +1,7 @@
 config:
   label: Home Control
-  sidebar: true
   layoutType: responsive
+  sidebar: true
 blocks:
   - component: oh-block
     config:
@@ -54,14 +54,14 @@ blocks:
                             '#E9C46A' : 'var(--f7-card-bg-color)')"
                           --f7-button-text-color: "=(items.ESP_LED_Inside_Inside_Light.state === 'ON' ?
                             '#264653' : 'var(--f7-text-color)')"
+                          align-items: center
                           borderRadius: 15px
+                          boxShadow: 0px 4px 10px rgba(0,0,0,0.05)
+                          display: flex
                           fontSize: 14px
                           fontWeight: 700
                           height: 80px
-                          boxShadow: 0px 4px 10px rgba(0,0,0,0.05)
-                          display: flex
                           justify-content: center
-                          align-items: center
                         text: 💡 Inside
               - component: oh-grid-col
                 config:
@@ -80,14 +80,14 @@ blocks:
                             '#E9C46A' : 'var(--f7-card-bg-color)')"
                           --f7-button-text-color: "=(items.ESP_LED_Outside_Outside_Light.state === 'ON' ?
                             '#264653' : 'var(--f7-text-color)')"
+                          align-items: center
                           borderRadius: 15px
+                          boxShadow: 0px 4px 10px rgba(0,0,0,0.05)
+                          display: flex
                           fontSize: 14px
                           fontWeight: 700
                           height: 80px
-                          boxShadow: 0px 4px 10px rgba(0,0,0,0.05)
-                          display: flex
                           justify-content: center
-                          align-items: center
                         text: 💡 Outside
   - component: oh-block
     config:
@@ -108,24 +108,24 @@ blocks:
                         actionCommand: "=(items.ESP_Door_Door_Switch.state === 'ON' ? 'OFF' : 'ON')"
                         actionItem: ESP_Door_Door_Switch
                         fill: true
+                        iconF7: "=(items.ESP_Door_Door_Switch.state === 'ON' ? 'door_left_hand_open' :
+                          'door_left_hand_closed')"
                         style:
                           --f7-button-bg-color: "=(items.ESP_DOOR_Lock_Door_Lock.state === 'ON' ?
                             '#bdc3c7' : (items.ESP_Door_Door_Switch.state ===
                             'ON' ? '#2A9D8F' : '#E76F51'))"
                           --f7-button-text-color: "#ffffff"
+                          align-items: center
                           borderRadius: 15px
+                          boxShadow: 0px 4px 15px rgba(0,0,0,0.1)
+                          display: flex
                           fontSize: 18px
                           fontWeight: 700
                           height: 80px
-                          display: flex
                           justify-content: center
-                          align-items: center
-                          boxShadow: 0px 4px 15px rgba(0,0,0,0.1)
                         text: "=(items.ESP_DOOR_Lock_Door_Lock.state === 'ON' ? 'DOOR LOCKED' :
                           items.ESP_Door_Door_Switch.state === 'ON' ? 'CLOSE
                           DOOR' : 'OPEN DOOR')"
-                        iconF7: "=(items.ESP_Door_Door_Switch.state === 'ON' ? 'door_left_hand_open' :
-                          'door_left_hand_closed')"
               - component: oh-grid-col
                 config:
                   width: 25
@@ -137,18 +137,18 @@ blocks:
                         actionCommand: "=(items.ESP_DOOR_Lock_Door_Lock.state === 'ON' ? 'OFF' : 'ON')"
                         actionItem: ESP_DOOR_Lock_Door_Lock
                         fill: true
+                        iconF7: "=(items.ESP_DOOR_Lock_Door_Lock.state === 'ON' ? 'lock_fill' :
+                          'lock_open_fill')"
                         style:
                           --f7-button-bg-color: "=(items.ESP_DOOR_Lock_Door_Lock.state === 'ON' ?
                             '#E76F51' : '#2A9D8F')"
                           --f7-button-text-color: "#ffffff"
-                          borderRadius: 15px
-                          height: 80px
-                          display: flex
-                          justify-content: center
                           align-items: center
+                          borderRadius: 15px
                           boxShadow: 0px 4px 15px rgba(0,0,0,0.1)
-                        iconF7: "=(items.ESP_DOOR_Lock_Door_Lock.state === 'ON' ? 'lock_fill' :
-                          'lock_open_fill')"
+                          display: flex
+                          height: 80px
+                          justify-content: center
   - component: oh-block
     config:
       title: Environment
@@ -169,12 +169,50 @@ blocks:
                         item: ESP_Humidity_Huminity_Sensor
                         label: =items.ESP_Humidity_Huminity_Sensor.state
                         style:
+                          alignItems: center
                           background: var(--f7-card-bg-color)
                           borderRadius: 15px
+                          boxShadow: 0px 4px 10px rgba(0,0,0,0.05)
+                          display: flex
+                          flexDirection: column
                           fontSize: 22px
                           fontWeight: 600
-                          boxShadow: 0px 4px 10px rgba(0,0,0,0.05)
+                          height: 120px
+                          justifyContent: center
+                          textAlign: center
                         title: Humidity
+  - component: oh-block
+    config:
+      title: Security
+    slots:
+      default:
+        - component: oh-grid-row
+          slots:
+            default:
+              - component: oh-grid-col
+                config:
+                  width: 100
+                slots:
+                  default:
+                    - component: oh-label-card
+                      config:
+                        icon: "=(items.ESP_Alarm_Alarm.state === 'ON' || items.ESP_Alarm_Alarm.state ===
+                          '1' ? 'f7:bell_fill' : 'f7:shield_fill')"
+                        label: "=(items.ESP_Alarm_Alarm.state === 'ON' || items.ESP_Alarm_Alarm.state
+                          === '1' ? '⚠️ ALARM TRIGGERED' : '✅ System Secure')"
+                        style:
+                          alignItems: center
+                          background: "=(items.ESP_Alarm_Alarm.state === 'ON' ||
+                            items.ESP_Alarm_Alarm.state === '1' ? '#e74c3c' :
+                            '#2ecc71')"
+                          borderRadius: 15px
+                          boxShadow: 0px 4px 15px rgba(0,0,0,0.1)
+                          color: white
+                          display: flex
+                          fontSize: 22px
+                          fontWeight: 700
+                          height: 100px
+                          justifyContent: center
 masonry: []
 grid: []
 canvas: []
