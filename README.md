@@ -104,6 +104,14 @@ So once we type the right number combination on the keypad, the door will be unl
  ┣ 📂pi_keypad -> Raspberry Pi Keypad
  ┃ ┣ 📜keypad_test.py
  ┃ ┗ 📜main.py
+ ┣ 📂schema -> KiCad Schema
+ ┃ ┣ 📜erasmus.kicad_pcb
+ ┃ ┣ 📜erasmus.kicad_prl
+ ┃ ┣ 📜erasmus.kicad_pro
+ ┃ ┣ 📜erasmus.kicad_sch
+ ┃ ┣ 📜symbols.bak
+ ┃ ┣ 📜symbols.kicad_sym
+ ┃ ┗ 📜~erasmus.kicad_sch.lck
  ┣ 📜README.md
  ┗ 📜homepage.yml -> OpenHAB Home Page
 ```
